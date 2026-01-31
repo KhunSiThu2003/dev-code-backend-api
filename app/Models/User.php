@@ -3,14 +3,19 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, MustVerifyEmail, CanResetPassword, HasApiTokens, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +25,19 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'profile_image',
+        'email_verified_at',
         'password',
+        'role',
+        'otp_code',
+        'otp_expires_at',
+        'otp_attempts',
+        'otp_request_count',
+        'otp_last_sent_at',
+        'otp_locked_at',
+        'otp_request_locked_at',
+        'otp_verified_at',
+        'otp_used_at',
     ];
 
     /**
@@ -42,7 +59,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'otp_expires_at'    => 'datetime',
+            'otp_locked_at'         => 'datetime',
+            'otp_request_locked_at' => 'datetime',
+            'password'          => 'hashed',
         ];
     }
 }

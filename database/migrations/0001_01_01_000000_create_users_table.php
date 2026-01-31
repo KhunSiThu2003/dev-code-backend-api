@@ -6,25 +6,37 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->enum('role', ['admin', 'learner', 'instructor'])->default('learner');
+            $table->string('password')->nullable();
+
+            $table->string('otp_code', 6)->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
+            $table->unsignedTinyInteger('otp_attempts')->default(0);
+            $table->unsignedTinyInteger('otp_request_count')->default(0);
+            $table->timestamp('otp_last_sent_at')->nullable();
+            $table->timestamp('otp_locked_at')->nullable();
+            $table->timestamp('otp_request_locked_at')->nullable();
+            $table->timestamp('otp_verified_at')->nullable();
+            $table->timestamp('otp_used_at')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
-            $table->string('token');
+            $table->string('token', 255);
             $table->timestamp('created_at')->nullable();
+            $table->index('created_at');
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -37,13 +49,10 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };
