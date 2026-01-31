@@ -15,11 +15,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Verified admin (for testing)
+        User::factory()
+            ->verified()
+            ->admin()
+            ->create([
+                'name'     => 'Admin User',
+                'email'    => 'devcode.mm@gmail.com',
+                'password' => 'asdffdsa',
+            ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Verified instructor
+        User::factory()
+            ->verified()
+            ->instructor()
+            ->create([
+                'name'  => 'Instructor User',
+                'email' => 'instructor@example.com',
+            ]);
+
+        // Fake verified learners (can log in immediately)
+        User::factory(10)->verified()->create();
+
+        // Optional: one known test learner
+        User::factory()
+            ->verified()
+            ->create([
+                'name'  => 'Test User',
+                'email' => 'test@example.com',
+            ]);
     }
 }

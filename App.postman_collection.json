@@ -1,0 +1,342 @@
+{
+	"info": {
+		"_postman_id": "659f14e9-fa66-4a7c-8185-a75e67bba112",
+		"name": "Dev Code API",
+		"description": "REST API for Dev Code application.\n\n**Base URL:** `{{base_url}}` (e.g. `http://localhost:8000/api/v1`)\n\n**Authentication:**\n- Public: register, login, verifyOtp, resendOtp, forgotPassword, resetPassword\n- Bearer token (auth:sanctum): profile, logout\n- Admin only (Bearer + role=admin): all /admin/* endpoints\n\n**Response format:**\n- Success: `{ \"success\": true, \"message\": \"...\", \"data\": { ... } }`\n- Error: `{ \"success\": false, \"message\": \"...\", \"errors\": { ... } }`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api/v1"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"description": "Authentication: register, verify OTP, login, forgot/reset password, logout. No token required except logout.",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"learner\",\n  \"agree_to_terms\": true\n}"
+						},
+						"url": "{{base_url}}/users/auth/register",
+						"description": "Register a new user. Sends OTP to email. Role: `learner`, `instructor`, or `admin`.\n\n**Body (JSON):** name, email, password, password_confirmation, role, agree_to_terms (required, accepted)."
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"otp_code\": \"123456\"\n}"
+						},
+						"url": "{{base_url}}/users/auth/verifyOtp",
+						"description": "Verify OTP sent to email after registration. Required before login."
+					}
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"type\": \"registration\"\n}"
+						},
+						"url": "{{base_url}}/users/auth/resendOtp",
+						"description": "Resend OTP. **type:** `registration` or `forgot_password`."
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"devcode.mm@gmail.com\",\n  \"password\": \"asdffdsa\"\n}"
+						},
+						"url": "{{base_url}}/users/auth/login",
+						"description": "Login with email and password. Returns **token** and **user**. User must be OTP-verified. Save `data.token` to use as Bearer token."
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": "{{base_url}}/users/auth/forgotPassword",
+						"description": "Send OTP to email for password reset."
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"otp_code\": \"123456\",\n  \"password\": \"newpassword123\",\n  \"password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": "{{base_url}}/users/auth/resetPassword",
+						"description": "Reset password using OTP from forgot password. Invalidates all tokens; user must login again."
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/users/auth/logout",
+						"description": "Revoke current Bearer token. Requires **Authorization: Bearer {{token}}**."
+					}
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"description": "Authenticated user profile: get, update, change password, delete account. All require **Authorization: Bearer {{token}}**.",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/users/profile",
+						"description": "Get current user profile (id, name, email, role, profile_image, created_at, updated_at)."
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "PUT",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "New Name", "type": "text" },
+								{ "key": "email", "value": "newemail@example.com", "type": "text" },
+								{ "key": "profile_image", "type": "file", "src": [] }
+							]
+						},
+						"url": "{{base_url}}/users/profile",
+						"description": "Update name, email, and/or profile_image. All fields optional. Image max 10MB (jpeg, jpg, png, gif, webp)."
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "PUT",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"current_password\": \"oldpass\",\n  \"password\": \"newpass123\",\n  \"password_confirmation\": \"newpass123\"\n}"
+						},
+						"url": "{{base_url}}/users/profile/change-password",
+						"description": "Change password. Revokes all tokens; user must login again with new password."
+					}
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"currentpassword\"\n}"
+						},
+						"url": "{{base_url}}/users/profile",
+						"description": "Permanently delete own account. Requires current password. All data and tokens removed."
+					}
+				}
+			]
+		},
+		{
+			"name": "Admin - Users",
+			"description": "Admin-only user management. Requires **Authorization: Bearer {{token}}** and user **role = admin**.",
+			"item": [
+				{
+					"name": "Get Users",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": {
+							"raw": "{{base_url}}/admin/users?per_page=10&limit=&search=&sort_by=id&order=asc&role=&status=active",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users"],
+							"query": [
+								{ "key": "per_page", "value": "10", "description": "Items per page (default 10)" },
+								{ "key": "limit", "value": "", "description": "Max results (optional)" },
+								{ "key": "search", "value": "", "description": "Search name or email" },
+								{ "key": "sort_by", "value": "id", "description": "id | name | email | created_at | deleted_at" },
+								{ "key": "order", "value": "asc", "description": "asc | desc" },
+								{ "key": "role", "value": "", "description": "admin | learner | instructor" },
+								{ "key": "status", "value": "active", "description": "active | deleted" }
+							]
+						},
+						"description": "List users with filters. **Query:** per_page, limit, search, sort_by, order, role, status (active|deleted). Returns paginated data + meta."
+					}
+				},
+				{
+					"name": "Create Admin or Instructor",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Admin\",\n  \"email\": \"admin2@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"admin\"\n}"
+						},
+						"url": "{{base_url}}/admin/users",
+						"description": "Create a new admin or instructor. **role:** `admin` or `instructor` only. User is created verified and can login immediately."
+					}
+				},
+				{
+					"name": "Get Active Users",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/active",
+						"description": "List active (non-deleted) users. Same query params as Get Users (per_page, limit, search, sort_by, order, role)."
+					}
+				},
+				{
+					"name": "Get Deleted Users",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/deleted",
+						"description": "List soft-deleted users. Same query params as Get Users."
+					}
+				},
+				{
+					"name": "Get Admins",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/admins",
+						"description": "List users with role admin (active only). Query: per_page, limit, search, sort_by, order."
+					}
+				},
+				{
+					"name": "Get Instructors",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/instructors",
+						"description": "List users with role instructor (active only). Query: per_page, limit, search, sort_by, order."
+					}
+				},
+				{
+					"name": "Get Learners",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/learners",
+						"description": "List users with role learner (active only). Query: per_page, limit, search, sort_by, order."
+					}
+				},
+				{
+					"name": "Show User",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/1",
+						"description": "Get single user by ID. Replace 1 with user id."
+					}
+				},
+				{
+					"name": "Soft Delete User",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "DELETE",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/1",
+						"description": "Soft delete a user (sets deleted_at). Revokes all tokens. Replace 1 with user id."
+					}
+				},
+				{
+					"name": "Restore User",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/1/restore",
+						"description": "Restore a soft-deleted user. Replace 1 with user id."
+					}
+				},
+				{
+					"name": "Force Delete User",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+						"method": "DELETE",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": "{{base_url}}/admin/users/1/force",
+						"description": "Permanently delete a user (including soft-deleted). Removes profile image and all tokens. Replace 1 with user id."
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{ "key": "token", "value": "{{token}}", "type": "string" }
+		]
+	}
+}
