@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
@@ -38,4 +39,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/users/{id}/restore', [UserController::class, 'restore']);
         Route::delete('/users/{id}/force', [UserController::class, 'forceDestroy']);
     });
+
+    Route::apiResource('categories', CourseCategoryController::class);
+    Route::put('/categories/{category}/toggle-active', [CourseCategoryController::class, 'toggleActive']);
+    
 });

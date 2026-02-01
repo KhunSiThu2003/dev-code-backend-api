@@ -41,7 +41,7 @@ class UserController extends Controller
         $sortBy  = $request->get('sort_by', 'id');
         $order   = $request->get('order', 'asc');
         $role    = $request->get('role');
-        $status  = $request->get('status', 'active');
+        $status  = $request->get('status');
 
         $allowedSort = ['id', 'name', 'email', 'created_at', 'deleted_at'];
 
@@ -53,7 +53,10 @@ class UserController extends Controller
             $order = 'asc';
         }
 
-        $query = $status === 'deleted' ? User::onlyTrashed() : User::query();
+        $query = is_null($status)
+            ? User::withTrashed()
+            : ($status === 'deleted' ? User::onlyTrashed() : User::query());
+
 
         if ($role && in_array($role, ['admin', 'learner', 'instructor'])) {
             $query->where('role', $role);
