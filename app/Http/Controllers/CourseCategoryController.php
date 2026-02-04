@@ -64,15 +64,16 @@ class CourseCategoryController extends Controller
      */
     public function store(StoreCourseCategoryRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $category = CourseCategory::create($request->validated());
 
-        $category = CourseCategory::create([
-            'name' => $validated['name'],
-            'description' => $validated['description'],
-            'is_active' => $validated['is_active'],
-        ]);
-
-        return $this->created(['category' => new categoryResource($category)], 'Category created successfully.');
+            return $this->success(
+                ['category' => new categoryResource($category)],
+                'Category created successfully.'
+            );
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage());
+        }
     }
 
     /**
@@ -80,13 +81,20 @@ class CourseCategoryController extends Controller
      */
     public function show(string $id)
     {
-        $category = CourseCategory::find($id);
+        try {
+            $category = CourseCategory::find($id);
 
-        if (!$category) {
-            return $this->notFound('Category not found.');
+            if (!$category) {
+                return $this->notFound('Category not found.');
+            }
+
+            return $this->success(
+                ['category' => new categoryResource($category)],
+                'Category retrieved successfully.'
+            );
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage());
         }
-
-        return $this->success(['category' => new categoryResource($category)], 'Category retrieved successfully.');
     }
 
     /**
@@ -94,18 +102,22 @@ class CourseCategoryController extends Controller
      */
     public function update(UpdateCourseCategoryRequest $request, string $id)
     {
-        $category = CourseCategory::find($id);
+        try {
+            $category = CourseCategory::find($id);
 
-        if (!$category) {
-            return $this->notFound('Category not found.');
+            if (!$category) {
+                return $this->notFound('Category not found.');
+            }
+
+            $category->update($request->validated());
+
+            return $this->success(
+                ['category' => new categoryResource($category)],
+                'Category updated successfully.'
+            );
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage());
         }
-
-        $category->update($request->validated());
-
-        return $this->success(
-            ['category' => new categoryResource($category)],
-            'Category updated successfully.'
-        );
     }
 
 
@@ -114,30 +126,41 @@ class CourseCategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        $category = CourseCategory::find($id);
+        try {
+            $category = CourseCategory::find($id);
 
-        if (!$category) {
-            return $this->notFound('Category not found.');
+            if (!$category) {
+                return $this->notFound('Category not found.');
+            }            
+
+            $category->delete();
+
+            return $this->success(
+                ['category' => new categoryResource($category)],
+                'Category deleted successfully.'
+            );
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage());
         }
-
-        $category->delete();
-
-        return $this->success([], 'Category deleted successfully.');
     }
 
     public function toggleActive(ToggleActiveRequest $request, string $id)
     {
-        $category = CourseCategory::find($id);
+        try {
+            $category = CourseCategory::find($id);
 
-        if (!$category) {
-            return $this->notFound('Category not found.');
+            if (!$category) {
+                return $this->notFound('Category not found.');
+            }
+
+            $category->update(['is_active' => !$category->is_active]);
+
+            return $this->success(
+                ['category' => new categoryResource($category)],
+                'Category updated successfully.'
+            );
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage());
         }
-
-        $category->update($request->validated());
-
-        return $this->success(
-            ['category' => new categoryResource($category)],
-            'Category updated successfully.'
-        );
     }
 }

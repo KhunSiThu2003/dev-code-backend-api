@@ -14,4 +14,9 @@ class CourseCategory extends Model
         'description',
         'is_active',
     ];
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'category_id');
+    }
 }

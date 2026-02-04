@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseCategoryController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
@@ -40,7 +41,13 @@ Route::prefix('v1')->group(function () {
         Route::delete('/users/{id}/force', [UserController::class, 'forceDestroy']);
     });
 
+    Route::prefix('instructor')->middleware(['auth:sanctum', 'instructor'])->group(function () {
+            Route::apiResource('courses', CourseController::class);
+            Route::get('/courses/instructor-id/{instructorId}', [CourseController::class, 'getCourseByInstructorId']);
+    });
+
     Route::apiResource('categories', CourseCategoryController::class);
     Route::put('/categories/{category}/toggle-active', [CourseCategoryController::class, 'toggleActive']);
+
     
 });

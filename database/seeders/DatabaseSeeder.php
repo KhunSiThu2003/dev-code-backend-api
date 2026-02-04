@@ -31,7 +31,8 @@ class DatabaseSeeder extends Seeder
             ->instructor()
             ->create([
                 'name'  => 'Instructor User',
-                'email' => 'instructor@example.com',
+                'email' => 'instructor@gmail.com',
+                'password' => 'asdffdsa'
             ]);
 
         // Fake verified learners (can log in immediately)

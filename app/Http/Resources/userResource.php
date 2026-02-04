@@ -25,7 +25,7 @@ class userResource extends JsonResource
         ];
     }
 
-        protected function profileImageUrl(): string
+    protected function profileImageUrl(): string
     {
         if (!$this->profile_image) {
             return "https://cdn.pixabay.com/photo/2021/11/24/05/19/user-6820232_1280.png";
